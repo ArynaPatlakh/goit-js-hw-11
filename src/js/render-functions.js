@@ -1,0 +1,1 @@
+// function for update HTML by js
