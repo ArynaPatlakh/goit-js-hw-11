@@ -1,54 +1,64 @@
-// all logic for Web-Site
-import './js/pixabay-api';
-import './js/render-functions';
+//! All logic for Web-Site
+
+import { getImages } from './js/pixabay-api';
+import { cardTemplate } from './js/render-functions';
+import { cardsTemplate } from './js/render-functions';
+
+//* Library
 import iziToast from 'izitoast';
 import 'izitoast/dist/css/iziToast.min.css';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
+
+// const lightbox = new SimpleLightbox('gallery a', {
+//   captionDelay: 250,
+//   captionsData: 'href',
+// });
 
 const refs = {
+  form: document.querySelector('.search-form'),
   btnSubmit: document.querySelector('.js-submit'),
   input: document.querySelector('input'),
+  list: document.querySelector('.gallery'),
+  images: document.querySelector('img'),
 };
 
-refs.btnSubmit.addEventListener('click', e => {
+const lightbox = new SimpleLightbox('.gallery li a', {
+  captionDelay: 250,
+  captionsData: 'alt',
+});
+
+refs.form.addEventListener('submit', btnEvent);
+
+function btnEvent(e) {
   e.preventDefault();
-  const userValue = refs.input.value;
-  userValue.trim();
+  const userValue = refs.input.value.trim();
+
   if (userValue.length !== 0 && userValue !== '') {
     getImages(userValue)
       .then(data => {
         if (data.total === 0) {
+          refs.input.value = '';
+          refs.list.textContent = '';
           iziToast.show({
             message:
               'Sorry, there are no images matching your search query. Please try again!',
-            backgroundColor: 'red',
+            backgroundColor: '#EF4040',
             messageColor: 'white',
             position: 'topRight',
+            class: 'error',
           });
         } else {
-          //   console.log();
-          // markUp(data);
+          const markUp = cardsTemplate(data.hits);
+
+          refs.list.innerHTML = markUp;
+          lightbox.refresh();
+          refs.input.value = '';
         }
       })
-      .catch(err => `Err in Fetch: ${err}`);
+      .catch(err => console.error(err));
   }
-});
-
-function getImages(value) {
-  const mainLink = 'https://pixabay.com/api/';
-  const myKey = '44735338-079c6790302f7dc185545e42d';
-  const params = new URLSearchParams({
-    key: myKey,
-    q: value,
-    image_type: 'photo',
-    orientation: 'horizontal',
-    safesearch: true,
-  });
-  const URL = `${mainLink}?${params}`;
-
-  //! Return massiv with a lot ob Object. I think that to pass something
-
-  console.log(fetch(URL).then(res => res.json()));
-  return fetch(URL).then(res => res.json());
 }
 
-// function markUp() {}
+// https://pixabay.com/get/gbae0d2a049180febfc8fb1e2bd87407de1406c47f8551f16e83e751d199676152087bafad3aac0569e9761d3ea1b5f8b7a4f9ce8130f41752d2dfdb324f8abe8_1280.jpg
+//https://pixabay.com/get/gbae0d2a049180febfc8fb1e2bd87407de1406c47f8551f16e83e751d199676152087bafad3aac0569e9761d3ea1b5f8b7a4f9ce8130f41752d2dfdb324f8abe8_1280.jpg%20class=
