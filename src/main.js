@@ -10,20 +10,14 @@ import 'izitoast/dist/css/iziToast.min.css';
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
 
-// const lightbox = new SimpleLightbox('gallery a', {
-//   captionDelay: 250,
-//   captionsData: 'href',
-// });
-
 const refs = {
   form: document.querySelector('.search-form'),
-  btnSubmit: document.querySelector('.js-submit'),
   input: document.querySelector('input'),
   list: document.querySelector('.gallery'),
-  images: document.querySelector('img'),
+  load: document.querySelector('.loader'),
 };
 
-const lightbox = new SimpleLightbox('.gallery li a', {
+const lightbox = new SimpleLightbox('.gallery a ', {
   captionDelay: 250,
   captionsData: 'alt',
 });
@@ -33,11 +27,12 @@ refs.form.addEventListener('submit', btnEvent);
 function btnEvent(e) {
   e.preventDefault();
   const userValue = refs.input.value.trim();
-
   if (userValue.length !== 0 && userValue !== '') {
+    refs.load.classList.remove('hidden');
     getImages(userValue)
       .then(data => {
         if (data.total === 0) {
+          refs.load.classList.add('hidden');
           refs.input.value = '';
           refs.list.textContent = '';
           iziToast.show({
@@ -50,15 +45,15 @@ function btnEvent(e) {
           });
         } else {
           const markUp = cardsTemplate(data.hits);
-
           refs.list.innerHTML = markUp;
+
           lightbox.refresh();
+
+          refs.load.classList.add('hidden');
+
           refs.input.value = '';
         }
       })
       .catch(err => console.error(err));
   }
 }
-
-// https://pixabay.com/get/gbae0d2a049180febfc8fb1e2bd87407de1406c47f8551f16e83e751d199676152087bafad3aac0569e9761d3ea1b5f8b7a4f9ce8130f41752d2dfdb324f8abe8_1280.jpg
-//https://pixabay.com/get/gbae0d2a049180febfc8fb1e2bd87407de1406c47f8551f16e83e751d199676152087bafad3aac0569e9761d3ea1b5f8b7a4f9ce8130f41752d2dfdb324f8abe8_1280.jpg%20class=
